@@ -21,18 +21,18 @@ jobs:
         git clone https://github.com/microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat
 
-    - name: Install dependencies
+    - name: Install ViGEmClient dependencies
       run: |
-        .\vcpkg\vcpkg install
+        .\vcpkg\vcpkg.exe install vigemclient:x86-windows vigemclient:x64-windows --overlay-ports="${{ github.workspace }}"
 
-    - name: Build ViGEmClient
+    - name: Build ViGEmClient DLL
       run: |
         mkdir build
         cd build
         cmake .. -A x64 -DCMAKE_TOOLCHAIN_FILE=..\vcpkg\scripts\buildsystems\vcpkg.cmake
         cmake --build . --config Release
 
-    - name: Upload artifacts
+    - name: Upload DLL artifacts
       uses: actions/upload-artifact@v3
       with:
         name: ViGEmClient-DLL

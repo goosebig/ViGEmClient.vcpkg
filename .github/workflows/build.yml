@@ -23,12 +23,22 @@ jobs:
         git clone https://github.com/microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat
 
-    # Step 3: Install ViGEmClient using vcpkg
+    # Step 3: Verify overlay-ports directory
+    - name: Verify overlay-ports directory
+      run: |
+        ls overlay-ports/vigemclient
+
+    # Step 4: Clean vcpkg cache
+    - name: Clean vcpkg cache
+      run: |
+        .\vcpkg\vcpkg.exe remove --outdated
+
+    # Step 5: Install ViGEmClient using vcpkg with overlay-ports
     - name: Install ViGEmClient
       run: |
-        .\vcpkg\vcpkg.exe install vigemclient:x86-windows vigemclient:x64-windows
+        .\vcpkg\vcpkg.exe install vigemclient:x86-windows vigemclient:x64-windows --overlay-ports="${{ github.workspace }}/overlay-ports"
 
-    # Step 4: Upload the generated DLL files
+    # Step 6: Upload the generated DLL files
     - name: Upload DLL artifacts
       uses: actions/upload-artifact@v3
       with:

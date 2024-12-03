@@ -29,8 +29,9 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -A x64 -DCMAKE_TOOLCHAIN_FILE=..\vcpkg\scripts\buildsystems\vcpkg.cmake
+        cmake ../overlay-ports/vigemclient -A x64 -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
         cmake --build . --config Release
+
 
     - name: Upload DLL artifacts
       uses: actions/upload-artifact@v3

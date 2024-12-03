@@ -13,32 +13,26 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    # Step 1: 检出项目代码
+    # Step 1: Checkout the repository
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # Step 2: 安装 vcpkg
+    # Step 2: Clone and bootstrap vcpkg
     - name: Setup vcpkg
       run: |
         git clone https://github.com/microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat
 
-    # Step 3: 安装 ViGEmClient
-    - name: Install ViGEmClient dependencies
+    # Step 3: Install ViGEmClient using vcpkg
+    - name: Install ViGEmClient
       run: |
-        .\vcpkg\vcpkg.exe install vigemclient:x86-windows vigemclient:x64-windows --overlay-ports="${{ github.workspace }}"
+        .\vcpkg\vcpkg.exe install vigemclient:x86-windows vigemclient:x64-windows
 
-    # Step 4: 使用 CMake 构建 DLL
-    - name: Build ViGEmClient DLL
-      run: |
-        mkdir build
-        cd build
-        cmake ../overlay-ports/vigemclient -A x64 -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
-        cmake --build . --config Release
-
-    # Step 5: 上传构建生成的 DLL 文件
+    # Step 4: Upload the generated DLL files
     - name: Upload DLL artifacts
       uses: actions/upload-artifact@v3
       with:
         name: ViGEmClient-DLL
-        path: build/Release/*.dll
+        path: |
+          vcpkg_installed/x86-windows/bin/*.dll
+          vcpkg_installed/x64-windows/bin/*.dll

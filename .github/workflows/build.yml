@@ -13,62 +13,45 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    # Step 1: Checkout the main repository
     - name: Checkout main repository
       uses: actions/checkout@v3
 
-    # Step 2: Remove existing overlay-ports directory
     - name: Remove existing overlay-ports directory
       run: |
         if (Test-Path overlay-ports) { Remove-Item -Recurse -Force overlay-ports }
 
-    # Step 3: Clone the ViGEmClient.vcpkg repository
     - name: Clone ViGEmClient.vcpkg
       run: |
         git clone https://github.com/ViGEm/ViGEmClient.vcpkg.git overlay-ports
 
-    # Step 4: Validate overlay-ports files
     - name: Validate overlay-ports files
       run: |
         ls overlay-ports || echo "overlay-ports directory missing."
         cat overlay-ports/CONTROL || echo "CONTROL file missing."
         cat overlay-ports/portfile.cmake || echo "portfile.cmake file missing."
 
-    # Step 5: Clone and bootstrap vcpkg
     - name: Setup vcpkg
       run: |
         git clone https://github.com/microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat
 
-    # Step 6: Capture vcpkg install output
     - name: Capture vcpkg install output
       run: |
         .\vcpkg\vcpkg.exe install vigemclient:x86-windows vigemclient:x64-windows --overlay-ports="${{ github.workspace }}/overlay-ports" | tee vcpkg-install.log
         cat vcpkg-install.log || echo "No output captured from vcpkg install."
 
-    # Step 7: Debug buildtrees directory
     - name: Debug buildtrees directory
       run: |
         ls -Recurse buildtrees || echo "No files found in buildtrees."
 
-    # Step 8: Manually build ViGEmClient with MSBuild
-    - name: Build ViGEmClient with MSBuild
-      run: |
-        msbuild.exe overlay-ports/ViGEmClient.sln /p:Configuration=Release_DLL /p:Platform=x86
-        msbuild.exe overlay-ports/ViGEmClient.sln /p:Configuration=Release_DLL /p:Platform=x64
-
-    # Step 9: Debug installed directory
-    - name: Debug vcpkg installed directory
-      run: |
-        ls vcpkg_installed || echo "No vcpkg_installed directory found."
-        ls vcpkg_installed/x86-windows || echo "No x86-windows directory found."
-        ls vcpkg_installed/x64-windows || echo "No x64-windows directory found."
-
-    # Step 10: Upload DLL artifacts
-    - name: Upload DLL artifacts
+    - name: Upload vcpkg install log
       uses: actions/upload-artifact@v3
       with:
-        name: ViGEmClient-DLL
-        path: |
-          vcpkg_installed/x86-windows/bin/*.dll
-          vcpkg_installed/x64-windows/bin/*.dll
+        name: vcpkg-install-log
+        path: vcpkg-install.log
+
+    - name: Upload buildtrees logs
+      uses: actions/upload-artifact@v3
+      with:
+        name: buildtrees-logs
+        path: buildtrees/**/*.log

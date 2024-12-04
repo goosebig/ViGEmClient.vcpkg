@@ -13,11 +13,11 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    # Step 1: Checkout the main repository
+    # Step 1: Checkout the main repository, just for rerun
     - name: Checkout main repository
       uses: actions/checkout@v3
 
-    # Step 2: Remove existing overlay-ports directory
+    # Step 2: Remove existing overlay-ports directory，
     - name: Remove existing overlay-ports directory
       run: |
         if (Test-Path overlay-ports) { Remove-Item -Recurse -Force overlay-ports }

@@ -1,4 +1,0 @@
-Source: vigemclient
-Version: 1.16.107
-Build-Depends: 
-Description: ViGEmClient library for virtual gamepad emulation.

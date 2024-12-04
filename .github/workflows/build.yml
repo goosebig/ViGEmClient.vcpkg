@@ -17,30 +17,35 @@ jobs:
     - name: Checkout main repository
       uses: actions/checkout@v3
 
-    # Step 2: Clone the ViGEmClient.vcpkg repository (overlay-ports)
+    # Step 2: Remove existing overlay-ports directory
+    - name: Remove existing overlay-ports directory
+      run: |
+        if (Test-Path overlay-ports) { Remove-Item -Recurse -Force overlay-ports }
+
+    # Step 3: Clone the ViGEmClient.vcpkg repository (overlay-ports)
     - name: Clone ViGEmClient.vcpkg
       run: |
         git clone https://github.com/ViGEm/ViGEmClient.vcpkg.git overlay-ports
 
-    # Step 3: Clone and bootstrap vcpkg
+    # Step 4: Clone and bootstrap vcpkg
     - name: Setup vcpkg
       run: |
         git clone https://github.com/microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat
 
-    # Step 4: Install ViGEmClient using vcpkg with overlay-ports
+    # Step 5: Install ViGEmClient using vcpkg with overlay-ports
     - name: Install ViGEmClient
       run: |
         .\vcpkg\vcpkg.exe install vigemclient:x86-windows vigemclient:x64-windows --overlay-ports="${{ github.workspace }}/overlay-ports"
 
-    # Step 5: Debug installed directory
+    # Step 6: Debug installed directory
     - name: Debug vcpkg installed directory
       run: |
         ls vcpkg_installed/x86-windows || echo "No x86-windows directory found."
         ls vcpkg_installed/x64-windows || echo "No x64-windows directory found."
         ls vcpkg_installed
 
-    # Step 6: Upload DLL artifacts
+    # Step 7: Upload DLL artifacts
     - name: Upload DLL artifacts
       uses: actions/upload-artifact@v3
       with:

@@ -13,33 +13,32 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    # Step 1: Checkout the repository
-    - name: Checkout code
+    # Step 1: Checkout the main repository
+    - name: Checkout main repository
       uses: actions/checkout@v3
 
-    # Step 2: Clone and bootstrap vcpkg
+    # Step 2: Clone the ViGEmClient.vcpkg repository (overlay-ports)
+    - name: Clone ViGEmClient.vcpkg
+      run: |
+        git clone https://github.com/ViGEm/ViGEmClient.vcpkg.git overlay-ports
+
+    # Step 3: Clone and bootstrap vcpkg
     - name: Setup vcpkg
       run: |
         git clone https://github.com/microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat
 
-    # Step 3: Install ViGEmClient using vcpkg with overlay-ports
+    # Step 4: Install ViGEmClient using vcpkg with overlay-ports
     - name: Install ViGEmClient
       run: |
         .\vcpkg\vcpkg.exe install vigemclient:x86-windows vigemclient:x64-windows --overlay-ports="${{ github.workspace }}/overlay-ports"
 
-    # Step 4: Debug vcpkg installed directory
+    # Step 5: Debug installed directory
     - name: Debug vcpkg installed directory
       run: |
-        ls vcpkg_installed/x86-windows/bin || echo "No x86-windows bin directory found."
-        ls vcpkg_installed/x64-windows/bin || echo "No x64-windows bin directory found."
+        ls vcpkg_installed/x86-windows || echo "No x86-windows directory found."
+        ls vcpkg_installed/x64-windows || echo "No x64-windows directory found."
         ls vcpkg_installed
-
-    # Step 5: Debug vcpkg logs
-    - name: Debug vcpkg logs
-      run: |
-        cat buildtrees/vigemclient/install-x86-windows-dbg-out.log || echo "No x86 debug log found."
-        cat buildtrees/vigemclient/install-x64-windows-dbg-out.log || echo "No x64 debug log found."
 
     # Step 6: Upload DLL artifacts
     - name: Upload DLL artifacts

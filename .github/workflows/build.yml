@@ -22,41 +22,37 @@ jobs:
       run: |
         if (Test-Path overlay-ports) { Remove-Item -Recurse -Force overlay-ports }
 
-    # Step 3: Clone the ViGEmClient.vcpkg repository (overlay-ports)
+    # Step 3: Clone the ViGEmClient.vcpkg repository
     - name: Clone ViGEmClient.vcpkg
       run: |
         git clone https://github.com/ViGEm/ViGEmClient.vcpkg.git overlay-ports
 
-    # Step 4: Clone and bootstrap vcpkg
+    # Step 4: Debug overlay-ports directory
+    - name: Debug overlay-ports directory
+      run: |
+        ls overlay-ports || echo "No overlay-ports directory found."
+        cat overlay-ports/CONTROL || echo "CONTROL file missing."
+        cat overlay-ports/portfile.cmake || echo "portfile.cmake file missing."
+
+    # Step 5: Clone and bootstrap vcpkg
     - name: Setup vcpkg
       run: |
         git clone https://github.com/microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat
 
-    # Step 5: Install ViGEmClient using vcpkg (Classic Mode)
+    # Step 6: Install ViGEmClient using vcpkg
     - name: Install ViGEmClient
       run: |
         .\vcpkg\vcpkg.exe install vigemclient:x86-windows vigemclient:x64-windows --overlay-ports="${{ github.workspace }}/overlay-ports"
 
-    # Step 6: Verify overlay-ports directory
-    - name: Verify overlay-ports directory
+    # Step 7: Debug installed directory
+    - name: Debug vcpkg installed directory
       run: |
-        ls overlay-ports/vigemclient || echo "No vigemclient port found in overlay-ports."
-        cat overlay-ports/vigemclient/portfile.cmake || echo "No portfile.cmake found."
-        cat overlay-ports/vigemclient/CONTROL || echo "No CONTROL file found."
+        ls vcpkg_installed || echo "No vcpkg_installed directory found."
+        ls vcpkg_installed/x86-windows || echo "No x86-windows directory found."
+        ls vcpkg_installed/x64-windows || echo "No x64-windows directory found."
 
-    # Step 7: Capture vcpkg install logs
-    - name: Capture vcpkg install output
-      run: |
-        .\vcpkg\vcpkg.exe install vigemclient:x86-windows vigemclient:x64-windows --overlay-ports="${{ github.workspace }}/overlay-ports" | tee vcpkg-install.log
-        cat vcpkg-install.log
-
-    # Step 8: List all files in buildtrees
-    - name: List all files in buildtrees
-      run: |
-        ls -Recurse buildtrees || echo "No files found in buildtrees."
-
-    # Step 9: Upload DLL artifacts
+    # Step 8: Upload DLL artifacts
     - name: Upload DLL artifacts
       uses: actions/upload-artifact@v3
       with:

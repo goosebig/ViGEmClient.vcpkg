@@ -24,34 +24,24 @@ jobs:
       run: |
         git clone https://github.com/ViGEm/ViGEmClient.vcpkg.git overlay-ports
 
-    - name: Validate overlay-ports files
-      run: |
-        ls overlay-ports || echo "overlay-ports directory missing."
-        cat overlay-ports/CONTROL || echo "CONTROL file missing."
-        cat overlay-ports/portfile.cmake || echo "portfile.cmake file missing."
-
     - name: Setup vcpkg
       run: |
         git clone https://github.com/microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat
 
-    - name: Capture vcpkg install output
+    - name: Install ViGEmClient using vcpkg
       run: |
-        .\vcpkg\vcpkg.exe install vigemclient:x86-windows vigemclient:x64-windows --overlay-ports="${{ github.workspace }}/overlay-ports" | tee vcpkg-install.log
-        cat vcpkg-install.log || echo "No output captured from vcpkg install."
+        .\vcpkg\vcpkg.exe install vigemclient:x86-windows vigemclient:x64-windows --overlay-ports="${{ github.workspace }}/overlay-ports"
 
-    - name: Debug buildtrees directory
+    - name: Debug package directories
       run: |
-        ls -Recurse buildtrees || echo "No files found in buildtrees."
+        ls -Recurse vcpkg/packages/vigemclient_x64-windows || echo "No x64 package directory found."
+        ls -Recurse vcpkg/packages/vigemclient_x86-windows || echo "No x86 package directory found."
 
-    - name: Upload vcpkg install log
+    - name: Upload DLLs from packages
       uses: actions/upload-artifact@v3
       with:
-        name: vcpkg-install-log
-        path: vcpkg-install.log
-
-    - name: Upload buildtrees logs
-      uses: actions/upload-artifact@v3
-      with:
-        name: buildtrees-logs
-        path: buildtrees/**/*.log
+        name: ViGEmClient-DLLs
+        path: |
+          vcpkg/packages/vigemclient_x64-windows/**/*.dll
+          vcpkg/packages/vigemclient_x86-windows/**/*.dll

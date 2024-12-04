@@ -38,14 +38,25 @@ jobs:
       run: |
         .\vcpkg\vcpkg.exe install vigemclient:x86-windows vigemclient:x64-windows --overlay-ports="${{ github.workspace }}/overlay-ports"
 
-    # Step 6: Debug installed directory
-    - name: Debug vcpkg installed directory
+    # Step 6: Debug vcpkg logs
+    - name: Debug vcpkg logs
       run: |
-        ls vcpkg_installed/x86-windows || echo "No x86-windows directory found."
-        ls vcpkg_installed/x64-windows || echo "No x64-windows directory found."
-        ls vcpkg_installed
+        cat buildtrees/vigemclient/install-x86-windows-dbg-out.log || echo "No x86 debug log found."
+        cat buildtrees/vigemclient/install-x64-windows-dbg-out.log || echo "No x64 debug log found."
+        cat buildtrees/vigemclient/build-x86-windows-dbg-out.log || echo "No x86 build log found."
+        cat buildtrees/vigemclient/build-x64-windows-dbg-out.log || echo "No x64 build log found."
 
-    # Step 7: Upload DLL artifacts
+    # Step 7: Verify overlay-ports directory
+    - name: Verify overlay-ports directory
+      run: |
+        ls overlay-ports/vigemclient || echo "No vigemclient port found in overlay-ports."
+
+    # Step 8: List all files in vcpkg_installed
+    - name: List all files in vcpkg_installed
+      run: |
+        ls -Recurse vcpkg_installed || echo "No files found in vcpkg_installed."
+
+    # Step 9: Upload DLL artifacts
     - name: Upload DLL artifacts
       uses: actions/upload-artifact@v3
       with:
